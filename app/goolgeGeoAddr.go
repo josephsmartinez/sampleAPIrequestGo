@@ -1,85 +1,85 @@
 package main
 
 import (
-	"encoding/json"
+	"bufio"
 	"fmt"
-	"io/ioutil"
-	"log"
-	"net/http"
-	"sampleAPIrequestGo/apistructs"
-	"sampleAPIrequestGo/filehandler"
+	"os"
+	"strings"
 )
 
-// GeocodingRequest HTTP request function
-func requestURL(url string) (*[]byte, bool) {
-	requestMade := true
-	resp, err := http.Get(url)
-	if err != nil {
-		log.Fatalln(err)
-		requestMade = false
+func login() {
+
+}
+
+func createAccount() {
+
+}
+
+func logInMenu() {
+
+	reader := bufio.NewReader(os.Stdin)
+	for {
+		fmt.Printf("(1) Log In\n" +
+			"(2) Create Account\n" +
+			"(q) Quit\n" +
+			"$ ")
+		stdin, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Println("error reading console")
+			continue
+		}
+
+		userSelect := strings.ToLower(strings.Trim(stdin, "\n"))
+		switch userSelect {
+		case "q":
+			fmt.Println("Good Bye")
+			os.Exit(0)
+		case "1":
+			login()
+		case "2":
+			createAccount()
+		}
 	}
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatalln(err)
-		requestMade = false
-	}
-	return &body, requestMade
 }
 
 func main() {
 
-	// Read JSON file, apply struct type, and unmarshall
-	apikeyBytes := filehandler.ReadJSONfile("apikey.json")
-	apikeyStruct := new(apistructs.APIKey)
-	apistructs.UnmarshallJSON(&apikeyBytes, apikeyStruct)
+	// Get User Request
+	logInMenu()
 
-	address := apistructs.Address{
-		StreetNumber: "1600",
-		StreetName:   "Amphitheatre Parkway",
-		City:         "Mountain View",
-		State:        "CA",
-	}
+	// // Read JSON file, apply struct type, and unmarshall
+	// apikeyBytes := filehandler.ReadJSONfile("apikey.json")
+	// apikeyStruct := new(apistructs.APIKey)
+	// apistructs.UnmarshallJSON(&apikeyBytes, apikeyStruct)
 
-	geoLocation := apistructs.GeoLocation{
-		Latitude:  "40.714224",
-		Longitude: "-73.961452",
-	}
+	// address := apistructs.Address{
+	// 	StreetNumber: "1600",
+	// 	StreetName:   "Amphitheatre Parkway",
+	// 	City:         "Mountain View",
+	// 	State:        "CA",
+	// }
 
-	// ADDRESS LOOKUP
-	formatedURL := address.AddressFormatter(&address, apikeyStruct.Key)
-	fmt.Println("---------ADDRESS LOOKUP----------------")
-	//geocodeBytes, _ := requestURL(formatedURL)
-	// stringData := string(*geocodeBytes)
-	// fileName := "geocodelookup.json"
-	// filehandler.PrintToFile(&stringData, fileName)
+	// geoLocation := apistructs.GeoLocation{
+	// 	Latitude:  "40.714224",
+	// 	Longitude: "-73.961452",
+	// }
 
-	// REVERSE LOOKUP
-	formatedURL = geoLocation.AddressFormatter(&geoLocation, apikeyStruct.Key)
-	fmt.Println("---------REVERSE LOOKUP----------------")
-	reverBytes, _ := requestURL(formatedURL)
-	// stringData = string(*reverBytes)
-	// fileName = "reverselookup.json"
-	// filehandler.PrintToFile(&stringData, fileName)
+	// // ADDRESS LOOKUP
+	// formatedURL := address.AddressFormatter(&address, apikeyStruct.Key)
+	// fmt.Println("---------ADDRESS LOOKUP----------------")
+	// //geocodeBytes, _ := apistructs.RequestURL(formatedURL)
+	// // stringData := string(*geocodeBytes)
+	// // fileName := "geocodelookup.json"
+	// // filehandler.PrintToFile(&stringData, fileName)
 
-	var dat map[string]interface{}
-	if err := json.Unmarshal(*reverBytes, &dat); err != nil {
-		panic(err)
-	}
+	// // REVERSE LOOKUP
+	// formatedURL = geoLocation.AddressFormatter(&geoLocation, apikeyStruct.Key)
+	// fmt.Println("---------REVERSE LOOKUP----------------")
+	// reverBytes, _ := apistructs.RequestURL(formatedURL)
+	// // stringData = string(*reverBytes)
+	// // fileName = "reverselookup.json"
+	// // filehandler.PrintToFile(&stringData, fileName)
 
-	statusCode := dat["status"]
-	plusCode := dat["plus_code"].(map[string]interface{})
-	compoundCode := plusCode["compound_code"]
-	globalCode := plusCode["global_code"]
-
-	xresults := dat["results"].([]interface{})
-	results := xresults[0].(map[string]interface{})
-	xaddressComponents := results["address_components"].([]interface{})
-	addressComponents := xaddressComponents[0].(map[string]interface{})
-
-	fmt.Println(statusCode)
-	fmt.Println(plusCode)
-	fmt.Println(compoundCode)
-	fmt.Println(globalCode)
-	fmt.Println(addressComponents["long_name"])
+	// apistructs.UnstructuredJSON(reverBytes)
 
 }

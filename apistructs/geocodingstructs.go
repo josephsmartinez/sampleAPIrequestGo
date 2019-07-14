@@ -2,7 +2,10 @@ package apistructs
 
 import (
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"strings"
 )
 
@@ -25,6 +28,22 @@ type GeoLocation struct {
 	Longitude string
 }
 
+// RequestURL - HTTP request function
+func RequestURL(url string) (*[]byte, bool) {
+	requestMade := true
+	resp, err := http.Get(url)
+	if err != nil {
+		log.Fatalln(err)
+		requestMade = false
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+		requestMade = false
+	}
+	return &body, requestMade
+}
+
 // MarshallJSON -
 func MarshallJSON(interface{}) {
 
@@ -41,6 +60,31 @@ func UnmarshallJSON(data *[]byte, obj interface{}) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+// UnstructuredJSON -
+func UnstructuredJSON(data *[]byte) {
+
+	var dat map[string]interface{}
+	if err := json.Unmarshal(*data, &dat); err != nil {
+		panic(err)
+	}
+
+	statusCode := dat["status"]
+	plusCode := dat["plus_code"].(map[string]interface{})
+	compoundCode := plusCode["compound_code"]
+	globalCode := plusCode["global_code"]
+
+	xresults := dat["results"].([]interface{})
+	results := xresults[0].(map[string]interface{})
+	xaddressComponents := results["address_components"].([]interface{})
+	addressComponents := xaddressComponents[0].(map[string]interface{})
+
+	fmt.Println(statusCode)
+	fmt.Println(plusCode)
+	fmt.Println(compoundCode)
+	fmt.Println(globalCode)
+	fmt.Println(addressComponents["long_name"])
 
 }
 
