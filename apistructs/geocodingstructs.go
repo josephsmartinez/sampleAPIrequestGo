@@ -1,5 +1,6 @@
 package apistructs
 
+
 import (
 	"encoding/json"
 	"fmt"
