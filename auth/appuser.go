@@ -1,4 +1,4 @@
-package user
+package auth
 
 // User data for url creatation
 type User struct {
